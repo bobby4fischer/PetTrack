@@ -1,0 +1,39 @@
+/* Cat wrapper */
+.cat-svg-wrap {
+  width: 211px;   /* matches your SVG width, adjust to scale */
+  height: 217px;
+  display: inline-block;
+  user-select: none;
+  -webkit-user-select: none;
+  position: relative;
+  touch-action: none;
+}
+
+/* Tail wag: animate the #tail group */
+.cat-svg-wrap svg #tail {
+  transform-box: fill-box;           /* ensure transform-origin uses object's box */
+  transform-origin:0% 0%;         /* tweak if needed */
+  animation: tailWag 1400ms ease-in-out infinite;
+}
+
+/* removed eyelid and head-follow styles */
+
+/* Tail keyframes */
+@keyframes tailWag {
+  /* 0%   { transform: rotate(-6deg); } */
+  25%  { transform: rotate(2deg); }
+   50%  { transform: rotate(8deg); } 
+  75%  { transform: rotate(2deg); }
+  /* 100% { transform: rotate(-6deg); } */ 
+}
+
+/* Smooth blink transition (we toggle opacity by JS) */
+.cat-svg-wrap svg #eyes-open,
+.cat-svg-wrap svg #eyes-closed {
+  transition: opacity 120ms linear;
+}
+
+
+
+
+

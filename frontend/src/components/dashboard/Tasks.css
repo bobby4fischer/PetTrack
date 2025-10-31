@@ -1,0 +1,83 @@
+/* Tasks panel */
+.tasks-panel .panel-title { 
+  height: height 100%;
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.tasks-panel .task-list-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.current-date { color:#718096; font-size:13px; font-weight:600; }
+
+/* Task input container */
+.task-input-container { padding: 16px; border-bottom: 1px solid rgba(0, 0, 0, 0.08); }
+.tasks-title { margin: 0 0 4px 0; font-size: 16px; font-weight: 600; }
+.tasks-date { margin: 0 0 12px 0; font-size: 13px; color: #718096; }
+.add-task-row { display:flex; gap:10px; margin-bottom:14px; }
+.task-input { flex:1; border:1px solid #e6eefb; padding:10px 12px; border-radius:10px; font-size:15px; }
+.add-btn { background: linear-gradient(90deg,#667eea 0%, #764ba2 100%); color:white; padding:10px 14px; border-radius:10px; border:none; cursor:pointer; font-weight:700; }
+.add-task-btn { background: #4758d9; color: white; border: none; border-radius:50%; width: 30px; height: 30px; cursor: pointer; margin-left: 20px; transition: background-color 0.2s; }
+.add-icon { font-size: 20px; }
+.add-task-btn:hover { background: #3a46b0; }
+
+/* Empty state */
+.empty-tasks { padding: 24px 16px; text-align: center; color: #718096; }
+
+/* Tasks container & list */
+.tasks-container { overflow-y: auto; }
+.tasks-list { 
+  display:flex; 
+  flex-direction:column; 
+  gap:10px; 
+  max-height:380px; 
+  overflow:auto; 
+  /* Improve scrollbar across browsers */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #9cc6ff #eef2f9; /* thumb track in light mode */
+}
+.tasks-list::-webkit-scrollbar { width: 10px; }
+.tasks-list::-webkit-scrollbar-track { background: #eef2f9; border-radius: 10px; }
+.tasks-list::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #c0c8dc, #9cc6ff); border-radius: 10px; }
+
+.task-item { display:flex; align-items:center; justify-content:space-between; padding:12px; border-radius:10px; background:#f8fafc; border:1px solid #eef2f7; transition: transform 0.15s ease, box-shadow 0.2s ease; }
+.task-item:hover { transform: translateY(-1px); box-shadow: 0 14px 28px rgba(23,30,48,0.08); }
+.task-item.completed { opacity:0.6; background: #ecfffb; }
+.task-content { display:flex; gap:10px; align-items:center; }
+.task-text { font-weight:600; color:#2d3748; }
+.delete-task { background:none; border:none; cursor:pointer; font-size:16px; opacity:0.7; }
+.task-item.completed .task-text { text-decoration: line-through; color: #a0aec0; }
+.delete-task:hover { opacity: 1; }
+
+/* Compact TaskCard styles (if used) */
+.taskcard { width:100%; background:#fff; border-radius:10px; padding:14px; display:flex; flex-direction:column; align-items:stretch; gap:12px; box-shadow: 0 8px 20px rgba(23, 30, 48, 0.04); border:1px solid rgba(15, 23, 42, 0.03); }
+.taskcard-header { display:flex; flex-direction:column; gap:10px; }
+.taskcard-title-row { display:flex; gap:8px; align-items:baseline; }
+.taskcard-title { font-size:18px; font-weight:700; margin:0; }
+.taskcard-sub { color:#718096; font-size:13px; margin:0; font-weight:700; }
+.taskcard-input-row { display:flex; }
+.taskcard-input { width:100%; padding:10px 12px; border-radius:8px; border:1px solid rgba(16,24,40,0.05); font-size:14px; }
+.taskcard-empty { width:100%; text-align:center; padding:8px 6px 6px; }
+.taskcard-empty-illustration { margin:8px auto; }
+.taskcard-empty-text { color:#718096; font-weight:600; margin:10px 0; font-size:13px; }
+.taskcard-add-btn { background:transparent; border:1px solid rgba(16,24,40,0.06); padding:6px 10px; border-radius:8px; cursor:pointer; }
+
+/* Utilities (scoped to Tasks only) */
+/* Remove generic .panel-title to avoid cross-component leakage */
+/* Hover brightness only for Tasks buttons */
+.taskcard .taskcard-add-btn:hover,
+.add-btn:hover { filter:brightness(0.98); }
+
+/* Dark theme overrides */
+.theme-dark .task-item,
+.theme-dark .task-input,
+.theme-dark .taskcard,
+.theme-dark .task-input-container { background: #0b1220; border-color: rgba(255,255,255,0.06); }
+.theme-dark .tasks-date,
+.theme-dark .current-date { color: #cbd5e1; }
+.theme-dark .task-text { color: #e5e7eb; }
+.theme-dark .task-input { color: #e5e7eb; caret-color: #e5e7eb; }
+.theme-dark .task-input::placeholder { color: #94a3b8; }
+.theme-dark .tasks-list { scrollbar-color: #38bdf8 #0a0f1a; }
+.theme-dark .tasks-list::-webkit-scrollbar-track { background: #0a0f1a; }
+.theme-dark .tasks-list::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #334155, #0ea5e9); }

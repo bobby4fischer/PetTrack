@@ -1,0 +1,55 @@
+/* Store modal and overlay */
+.store-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.store-modal {
+  width: 92%;
+  max-width: 440px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(16,24,40,0.18);
+  border: 1px solid rgba(16,24,40,0.08);
+  padding: 16px;
+}
+
+.theme-dark .store-modal {
+  background: #111827;
+  border-color: rgba(255,255,255,0.08);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.5);
+}
+
+/* Header */
+.store-header { display:flex; align-items:center; justify-content:space-between; }
+.store-title { margin:0; font-size:18px; font-weight:700; }
+.store-close { background:none; border:none; cursor:pointer; font-size:16px; opacity:0.7; }
+.store-close:hover { opacity:1; }
+
+/* Body */
+.store-section { display:flex; flex-direction:column; gap:12px; margin-top:12px; }
+.store-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; background:#f7fafc; border-radius:10px; border:1px solid #eef2f7; }
+.theme-dark .store-row { background:#0b1220; border-color: rgba(255,255,255,0.06); }
+.store-label { font-weight:600; color:#4a5568; }
+.theme-dark .store-label { color:#cbd5e1; }
+.store-value { font-weight:700; color:#2d3748; }
+.theme-dark .store-value { color:#e5e7eb; }
+
+/* Store specific cards */
+.store-grid { display:grid; grid-template-columns: 1fr; gap:12px; }
+@media (min-width: 460px) { .store-grid { grid-template-columns: 1fr 1fr; } }
+.store-card { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; background:#fff; border-radius:10px; border:1px solid #eef2f7; box-shadow: 0 8px 20px rgba(23,30,48,0.04); }
+.theme-dark .store-card { background:#0b1220; border-color: rgba(255,255,255,0.06); }
+.store-item-left { display:flex; align-items:center; gap:12px; }
+.store-emoji { font-size: 22px; }
+.store-meta { display:flex; flex-direction:column; line-height:1.1; }
+.store-name { font-weight:700; }
+.store-desc { font-size:12px; color:#718096; }
+.store-price { font-size:12px; color:#718096; }
+.theme-dark .store-price { color: #94a3b8; }
+.store-buy-btn { background: linear-gradient(90deg,#667eea 0%, #764ba2 100%); color:white; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700; }

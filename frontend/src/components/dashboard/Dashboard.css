@@ -1,0 +1,147 @@
+:root{
+  --bg: #f6f9ff;
+  --muted: #718096;
+  --text: #1f2937;
+  --card-bg: linear-gradient(180deg,#ffffff,#f7f8fc);
+  --glass: rgba(255,255,255,0.9);
+  --primary: #4758d9;
+  --accent: #9f7aea;
+  --success: #48bb78;
+  --danger: #e53e3e;
+
+  /* Timer tokens moved to component-specific CSS (FocusTimer.css) */
+
+  /* layout */
+  --card-radius: 14px;
+  --card-padding: 18px;
+  --shadow-1: 0 10px 30px rgba(23,30,48,0.06);
+}
+
+/* Root / layout */
+.dashboard-root {
+  /* background: linear-gradient(135deg, #f6f9ff 0%, #f0f6ff 100%); */
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial;
+  color: #2d3748;
+  min-height: 100vh;
+}
+
+/* Dark theme basics */
+.theme-dark {
+  background: #0f172a; /* slate-900 */
+  color: #e5e7eb; /* gray-200 */
+}
+.theme-dark .top-nav {
+  background: rgba(17, 24, 39, 0.9); /* slate-800 */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+.theme-dark .panel.card {
+  background: #111827; /* gray-900 */
+  border-color: rgba(255,255,255,0.06);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+.theme-dark .nav-button { color: #a5b4fc; border-color: rgba(165,180,252,0.18); background: rgba(99,102,241,0.1); }
+
+/* Top nav */
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 100%);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 20px rgba(40, 45, 60, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.app-title {
+  font-size: 20px;
+  margin: 0;
+  font-weight: 700;
+}
+
+.nav-center {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.nav-button {
+  background: rgba(102, 126, 234, 0.08);
+  border: 1px solid rgba(102, 126, 234, 0.12);
+  color: #4758d9;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.nav-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(72, 88, 255, 0.08);
+}
+
+.nav-button.pomodoro-btn {
+  background: rgba(255, 99, 71, 0.06);
+  border-color: rgba(255, 99, 71, 0.12);
+  color: #ff6347;
+}
+
+.nav-right { display: flex; align-items: center; gap: 12px; }
+.gems-badge {
+  background: #fff6fd;
+  border: 1px solid #ffd6f1;
+  color: #d53f8c;
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+.theme-dark .gems-badge { background: #1a1020; border-color: rgba(255,255,255,0.1); color: #f472b6; }
+
+/* Logout button styling moved to Settings.css */
+
+/* Dashboard content grid */
+.dashboard-content {
+  max-width: 1200px;
+  max-height:100%;
+  margin: 26px auto;
+  display: grid;
+  grid-template-columns: 300px 1fr 360px;
+  gap: 22px;
+  align-items: start;
+}
+
+/* Generic panel/card */
+.panel.card {
+  background: linear-gradient(180deg, #ffffff, #f8f9fc);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 20px 40px rgba(37, 50, 71, 0.06);
+  border: 1px solid rgba(16, 24, 40, 0.04);
+}
+
+
+/* CENTER: Pet display */
+.center-panel { display:flex; flex-direction: column; align-items:center; justify-content:flex-start; }
+.pet-display { display:flex; align-items:center; justify-content:center; min-height:240px; background: transparent; box-shadow: none; }
+
+.rip-image { width: 160px; height: auto; opacity: 0.9; margin-bottom: 8px; }
+.renew-button { background: #4758d9; color: white; border: none; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-weight: 700; }
+.renew-button:hover { background: #3a46b0; }
+
+
+
+
+/* Visual glow behind the cat */
+.pet-display::before { content: none; display: none; }
+
+
+/* Hover brightness effects owned by component CSS (Tasks/PetCare) */
+
+
+/* Dark theme refinements */
+.theme-dark .pet-display { background: #0b1220; box-shadow: none; }
+.theme-dark .pet-display::before { content: none; display: none; }
