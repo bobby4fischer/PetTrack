@@ -18,7 +18,7 @@ const PetCare = ({ inventory, petData, feedPet }) => {
           <button
             className="feed-button"
             onClick={() => feedPet("food")}
-            disabled={inventory.food === 0 || petData.life >= 100}
+            disabled={inventory.food === 0 || !petData.isAlive}
           >
             Feed
           </button>
@@ -35,7 +35,7 @@ const PetCare = ({ inventory, petData, feedPet }) => {
           <button
             className="feed-button"
             onClick={() => feedPet("milk")}
-            disabled={inventory.milk === 0 || petData.life >= 100}
+            disabled={inventory.milk === 0 || !petData.isAlive}
           >
             Give Milk
           </button>
@@ -52,7 +52,7 @@ const PetCare = ({ inventory, petData, feedPet }) => {
           <button
             className="feed-button"
             onClick={() => feedPet("toys")}
-            disabled={inventory.toys === 0 || petData.life >= 100}
+            disabled={inventory.toys === 0 || !petData.isAlive}
           >
             Play
           </button>

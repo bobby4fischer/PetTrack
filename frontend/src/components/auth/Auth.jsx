@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { authLogin, authSignup } from '../../api/client.js';
 import './Auth.css';
 
 const Auth = ({ onAuthSuccess }) => {
@@ -62,18 +63,50 @@ const Auth = ({ onAuthSuccess }) => {
     }
 
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Store user data in localStorage for demo
-      localStorage.setItem('user', JSON.stringify({
-        email: formData.email,
-        isAuthenticated: true
-      }));
-      // Inform app of login success with context
-      onAuthSuccess({ email: formData.email, isNew: !isLogin });
-    }, 1500);
+    try {
+      const email = formData.email.trim();
+      if (isLogin) {
+        const r = await authLogin(email, formData.password)
+        const { token, user } = r.data
+        localStorage.setItem('authToken', token)
+        try { if (window.chrome && chrome.storage && chrome.storage.sync) chrome.storage.sync.set({ pettalkToken: token }) } catch {}
+        localStorage.setItem('user', JSON.stringify({ email: user.email }))
+        setIsLoading(false)
+        onAuthSuccess({ email: user.email, isNew: false })
+      } else {
+        const r = await authSignup(email, formData.password, email.split('@')[0])
+        const { token, user } = r.data
+        localStorage.setItem('authToken', token)
+        try { if (window.chrome && chrome.storage && chrome.storage.sync) chrome.storage.sync.set({ pettalkToken: token }) } catch {}
+        localStorage.setItem('user', JSON.stringify({ email: user.email }))
+        setIsLoading(false)
+        onAuthSuccess({ email: user.email, isNew: true })
+      }
+    } catch (err) {
+      try {
+        const email = formData.email.trim();
+        const passKey = `auth:${email}`;
+        if (isLogin) {
+          const stored = localStorage.getItem(passKey);
+          if (!stored) throw new Error('Account not found')
+          const { password: savedPassword } = JSON.parse(stored);
+          if (savedPassword !== formData.password) throw new Error('Incorrect password')
+          localStorage.setItem('user', JSON.stringify({ email }));
+          setIsLoading(false);
+          onAuthSuccess({ email, isNew: false });
+        } else {
+          const exists = localStorage.getItem(passKey);
+          if (exists) throw new Error('Account already exists')
+          localStorage.setItem(passKey, JSON.stringify({ password: formData.password }));
+          localStorage.setItem('user', JSON.stringify({ email }));
+          setIsLoading(false);
+          onAuthSuccess({ email, isNew: true });
+        }
+      } catch (e) {
+        setErrors({ api: 'Authentication failed' });
+        setIsLoading(false);
+      }
+    }
   };
 
   const toggleMode = () => {

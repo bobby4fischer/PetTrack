@@ -11,8 +11,8 @@ import Tasks from "./Tasks";
 import {
   openSettings, closeSettings, openStore, closeStore, openManual, closeManual, toggleTheme,
   decreaseLife, increaseLife, renew,
-  addGems, setGems, addItem, consumeItem, setInventory,
-  addTask as addTaskAction, deleteTask as deleteTaskAction, completeTask as completeTaskAction,
+  addGems, setGems, addItem, consumeItem, setInventory, spendGems,
+  addTask as addTaskAction, deleteTask as deleteTaskAction, completeTask as completeTaskAction, setTasks as setTasksAction,
   setMinutes as setMinutesAction, setSeconds as setSecondsAction, setRunning as setRunningAction, setInitialSeconds as setInitialSecondsAction, reset as resetAction,
   togglePlaying as togglePlayingAction, setVolume as setVolumeAction,
 } from '../../store/store.js';
@@ -38,6 +38,11 @@ const Dashboard = ({ onLogout }) => {
   const musicTrack = useSelector((s) => s.audio.track);
   const audioRef = useRef(null);
   const [newTask, setNewTask] = useState("");
+  const [healthDialogOpen, setHealthDialogOpen] = useState(false);
+  const [petReactKey, setPetReactKey] = useState(0);
+  const [sessionId, setSessionId] = useState(null);
+  const [activeTaskId, setActiveTaskId] = useState(null);
+  const [timerMode, setTimerMode] = useState('focus');
 
   const openSettingsHandler = () => dispatch(openSettings());
   const closeSettingsHandler = () => dispatch(closeSettings());
@@ -47,20 +52,41 @@ const Dashboard = ({ onLogout }) => {
   const closeManualHandler = () => dispatch(closeManual());
   const toggleThemeHandler = () => dispatch(toggleTheme());
 
-  // Pet life system: hourly decrease by 15 with offline catch-up
+  // Pet life system: decrease by 1 per minute with offline catch-up
   useEffect(() => {
     if (!userEmail) return;
     const now = Date.now();
     const last = petData.lastUpdated || now;
-    const hours = Math.floor((now - last) / (60 * 60 * 1000));
-    if (hours > 0) {
-      dispatch(decreaseLife(hours * 15));
+    const minutes = Math.floor((now - last) / (60 * 1000));
+    if (minutes > 0) {
+      dispatch(decreaseLife(minutes));
     }
     const interval = setInterval(() => {
-      dispatch(decreaseLife(15));
-    }, 60 * 60 * 1000);
+      dispatch(decreaseLife(1));
+    }, 60 * 1000);
     return () => clearInterval(interval);
   }, [dispatch, userEmail]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('authToken')
+    if (!token) return
+    let socket
+    (async () => {
+      const { createSocket } = await import('../../socket.js')
+      socket = createSocket()
+      socket.on('reward:update', (p) => {
+        const d = Number(p?.gemsDelta || 0)
+        if (d) dispatch(addGems(d))
+      })
+      socket.on('pet:react', () => {
+        setPetReactKey((k) => k + 1)
+      })
+      socket.on('idle:alert', () => {
+        setPetReactKey((k) => k + 1)
+      })
+    })()
+    return () => { try { socket?.close() } catch {} }
+  }, [dispatch])
 
   // Apply theme class to root
   useEffect(() => {
@@ -73,22 +99,43 @@ const Dashboard = ({ onLogout }) => {
   // Persistence handled by Redux store subscription
 
   const feedPet = (type) => {
-    if (inventory[type] > 0 && petData.life < 100) {
+    if (!petData.isAlive) return;
+    if (inventory[type] > 0) {
+      const amt = type === 'food' ? 10 : type === 'milk' ? 5 : 15;
+      const current = petData.life || 0;
+      // If applying the amount would exceed 100, do nothing
+      if (current >= 100 || current + amt > 100) {
+        setHealthDialogOpen(true);
+        return;
+      }
       dispatch(consumeItem(type));
-      const amt = type === 'food' ? 20 : type === 'milk' ? 15 : 10;
       dispatch(increaseLife(amt));
     }
   };
 
-  const addTask = () => {
-    if (newTask.trim()) {
-      dispatch(addTaskAction(newTask.trim()));
-      setNewTask("");
+  const addTask = async () => {
+    if (timerMode === 'free') { return }
+    const title = newTask.trim()
+    if (!title) return
+    try {
+      const token = localStorage.getItem('authToken')
+      if (token) {
+        const { taskCreate } = await import('../../api/client.js')
+        const r = await taskCreate(title)
+        const created = r.data
+        dispatch(addTaskAction(created.title))
+      } else {
+        dispatch(addTaskAction(title))
+      }
+      setNewTask("")
+    } catch {
+      dispatch(addTaskAction(title))
+      setNewTask("")
     }
   };
 
   // Store actions: purchase using gems
-  const ITEM_COSTS = { food: 3, milk: 2, toys: 4 };
+  const ITEM_COSTS = { food: 9, milk: 8, toys: 10 };
   const buyItem = (type) => {
     const cost = ITEM_COSTS[type] ?? 1;
     if (gems < cost) {
@@ -99,31 +146,95 @@ const Dashboard = ({ onLogout }) => {
     dispatch(addItem(type));
   };
 
-  const completeTask = (id) => {
-    const task = tasks.find((t) => t.id === id);
-    dispatch(completeTaskAction(id));
-    if (task && user?.email) {
-      const key = `completedTasks:${user.email}`;
-      let history = [];
-      try {
-        const existing = localStorage.getItem(key);
-        history = existing ? JSON.parse(existing) : [];
-      } catch {}
-      history.push({ id: task.id, text: task.text, completedAt: new Date().toISOString() });
-      localStorage.setItem(key, JSON.stringify(history));
-      dispatch(addGems(3));
+  const completeTask = async (id) => {
+    try {
+      const { taskComplete } = await import('../../api/client.js')
+      await taskComplete(id)
+      dispatch(completeTaskAction(id))
+    } catch (e) {
+      alert('Complete a 25-minute Pomodoro linked to this task first')
     }
   };
 
   const deleteTask = (id) => {
     dispatch(deleteTaskAction(id));
+    if (id === activeTaskId) {
+      setActiveTaskId(null)
+      dispatch(setRunningAction(false))
+      dispatch(setMinutesAction(25))
+      dispatch(setSecondsAction(0))
+      dispatch(setInitialSecondsAction(25 * 60))
+      setTimerMode('focus')
+    }
   };
+
+  const focusTaskSelect = (id) => {
+    if (timerMode === 'focus' && isTimerRunning) return
+    setActiveTaskId(id)
+    if (timerMode === 'focus' && !isTimerRunning) {
+      dispatch(setMinutesAction(25))
+      dispatch(setSecondsAction(0))
+      dispatch(setInitialSecondsAction(25 * 60))
+    }
+  }
 
   const getCurrentDate = () => {
     const now = new Date();
     const options = { weekday: "short", day: "numeric", month: "short" };
     return now.toLocaleDateString("en-US", options); // e.g. "Thu, 23 Oct"
   };
+
+  // Email summary scheduler (local stub): every 100 minutes
+  // Aggregates completed tasks since last summary and stores a draft in localStorage.
+  useEffect(() => {
+    if (!userEmail) return;
+    const keyLast = `emailLast:${userEmail}`;
+    const keyCompleted = `completedTasks:${userEmail}`;
+    const keyDrafts = `emailDrafts:${userEmail}`;
+
+    const sendSummary = () => {
+      let history = [];
+      try {
+        const raw = localStorage.getItem(keyCompleted);
+        history = raw ? JSON.parse(raw) : [];
+      } catch {}
+
+      const lastSent = Number(localStorage.getItem(keyLast) || 0);
+      const since = lastSent || 0;
+      const recent = history.filter((h) => {
+        const t = new Date(h.completedAt).getTime();
+        return !Number.isNaN(t) && t > since;
+      });
+
+      const summary = {
+        at: new Date().toISOString(),
+        count: recent.length,
+        tasks: recent,
+      };
+
+      // Append to drafts list
+      try {
+        const prev = localStorage.getItem(keyDrafts);
+        const drafts = prev ? JSON.parse(prev) : [];
+        drafts.push(summary);
+        localStorage.setItem(keyDrafts, JSON.stringify(drafts));
+      } catch {}
+
+      // Update last sent time
+      localStorage.setItem(keyLast, String(Date.now()));
+    };
+
+    // On mount, perform catch-up summary once if overdue
+    const lastSent = Number(localStorage.getItem(keyLast) || 0);
+    const now = Date.now();
+    const overdue = lastSent === 0 || (now - lastSent) >= (100 * 60 * 1000);
+    if (overdue) {
+      sendSummary();
+    }
+
+    const interval = setInterval(sendSummary, 100 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [userEmail]);
 
   // Timer functionality
   useEffect(() => {
@@ -138,15 +249,75 @@ const Dashboard = ({ onLogout }) => {
         } else {
           dispatch(setRunningAction(false));
           alert("Timer finished!");
+          if (sessionId) {
+            (async () => {
+              try {
+                const { sessionStop } = await import('../../api/client.js')
+                await sessionStop(sessionId)
+                setSessionId(null)
+              } catch {}
+            })()
+          }
+          (async () => {
+            if (timerMode === 'focus') {
+              try {
+                if (activeTaskId) {
+                  const token = localStorage.getItem('authToken')
+                  if (token) {
+                    const { taskDelete } = await import('../../api/client.js')
+                    await taskDelete(activeTaskId)
+                  }
+                  dispatch(deleteTaskAction(activeTaskId))
+                  setActiveTaskId(null)
+                }
+              } catch {
+                if (activeTaskId) {
+                  dispatch(deleteTaskAction(activeTaskId))
+                  setActiveTaskId(null)
+                }
+              }
+              dispatch(setMinutesAction(0))
+              dispatch(setSecondsAction(10))
+              dispatch(setInitialSecondsAction(10))
+              dispatch(setRunningAction(false))
+              setTimerMode('free')
+              const token = localStorage.getItem('authToken')
+              if (!token) {
+                dispatch(addGems(5))
+              }
+            } else {
+              dispatch(setMinutesAction(0))
+              dispatch(setSecondsAction(30))
+              dispatch(setInitialSecondsAction(30))
+              dispatch(setRunningAction(false))
+              setTimerMode('focus')
+            }
+          })()
         }
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [dispatch, isTimerRunning, timerMinutes, timerSeconds]);
+  }, [dispatch, isTimerRunning, timerMinutes, timerSeconds, sessionId, timerMode]);
 
   const startTimer = () => {
-    dispatch(setInitialSecondsAction(timerMinutes * 60 + timerSeconds));
+    if (timerMode === 'focus' && !activeTaskId) { alert('Select a task to focus on before starting the timer'); return; }
+    const remaining = timerMinutes * 60 + timerSeconds;
+    if (timerMode === 'free') {
+      if (initialTimerSeconds !== 10) dispatch(setInitialSecondsAction(10));
+    } else {
+      if (initialTimerSeconds === remaining) dispatch(setInitialSecondsAction(remaining));
+    }
     dispatch(setRunningAction(true));
+    (async () => {
+      try {
+        const token = localStorage.getItem('authToken')
+        if (token && timerMode === 'focus') {
+          const { sessionStart } = await import('../../api/client.js')
+          const r = await sessionStart(activeTaskId)
+          setSessionId(r.data._id)
+        }
+      } catch {}
+    })()
   };
 
   const pauseTimer = () => {
@@ -154,7 +325,23 @@ const Dashboard = ({ onLogout }) => {
   };
 
   const resetTimer = () => {
-    dispatch(resetAction());
+    if (timerMode === 'free') {
+      dispatch(setMinutesAction(0));
+      dispatch(setSecondsAction(10));
+      dispatch(setInitialSecondsAction(10));
+      dispatch(setRunningAction(false));
+    } else {
+      dispatch(resetAction());
+    }
+    if (sessionId) {
+      (async () => {
+        try {
+          const { sessionStop } = await import('../../api/client.js')
+          await sessionStop(sessionId)
+          setSessionId(null)
+        } catch {}
+      })()
+    }
   };
 
   const toggleMusic = () => {
@@ -209,13 +396,15 @@ const Dashboard = ({ onLogout }) => {
         {/* Center panel */}
         <section className="center-panel">
           <div className="pet-display">
-            {petData.life > 0 ? (
-              <Cat 
-                name={petData.name} 
-                life={petData.life} 
-                isAlive={petData.isAlive} 
-              />
-            ) : (
+              {petData.life > 0 ? (
+                <Cat 
+                  name={petData.name} 
+                  life={petData.life} 
+                  isAlive={petData.isAlive} 
+                  reactKey={petReactKey}
+                  moodPercent={petData.life}
+                />
+              ) : (
               <div className="pet-memorial">
                 <img src="/assets/images/rip.png" alt="RIP" className="rip-image" />
                 <p className="memorial-message">Your beloved pet has passed away.</p>
@@ -226,7 +415,7 @@ const Dashboard = ({ onLogout }) => {
                     dispatch(renew());
                     dispatch(setGems(0));
                     dispatch(setInventory({ food: 0, milk: 0, toys: 0 }));
-                    dispatch(setTasks([]));
+                    dispatch(setTasksAction([]));
                   }}
                 >Renew</button>
               </div>
@@ -246,6 +435,8 @@ const Dashboard = ({ onLogout }) => {
                 setMusicVolume={setMusicVolumeHandler}
                 musicTrack={musicTrack}
                 audioRef={audioRef}
+                activeTaskTitle={(tasks.find((t) => t.id === activeTaskId)?.text) || ''}
+                startDisabled={timerMode === 'focus' && !activeTaskId}
               />
             )}
           </div>
@@ -261,6 +452,12 @@ const Dashboard = ({ onLogout }) => {
             completeTask={completeTask}
             deleteTask={deleteTask}
             getCurrentDate={getCurrentDate}
+            activeTaskId={activeTaskId}
+            setActiveTaskId={setActiveTaskId}
+            isAddDisabled={timerMode === 'free'}
+            disableInteractions={timerMode === 'free'}
+            onFocusTask={focusTaskSelect}
+            disableFocus={timerMode === 'focus' && isTimerRunning}
           />
         </aside>
       </main>
@@ -283,6 +480,18 @@ const Dashboard = ({ onLogout }) => {
       />
 
       <Manual isOpen={isManualOpen} onClose={closeManualHandler} />
+      {healthDialogOpen && (
+        <div className="modal-overlay" onClick={() => setHealthDialogOpen(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-icon">✨</div>
+            <h3 className="modal-title">Sufficient health</h3>
+            <p className="modal-body">Your pet is already healthy. Feeding is skipped to avoid exceeding 100.</p>
+            <div className="modal-actions">
+              <button className="modal-button" onClick={() => setHealthDialogOpen(false)}>OK</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

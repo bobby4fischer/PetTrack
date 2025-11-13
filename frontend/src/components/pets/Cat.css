@@ -27,10 +27,96 @@
   /* 100% { transform: rotate(-6deg); } */ 
 }
 
+@keyframes tailWagFast {
+  25%  { transform: rotate(6deg); }
+  50%  { transform: rotate(14deg); }
+  75%  { transform: rotate(6deg); }
+}
+
+@keyframes danceSway {
+  0% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-2px) rotate(-2deg); }
+  50% { transform: translateY(0) rotate(0deg); }
+  75% { transform: translateY(-2px) rotate(2deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+@keyframes stepLeft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes stepRight {
+  0%, 100% { transform: translateY(-3px); }
+  50% { transform: translateY(0); }
+}
+
 /* Smooth blink transition (we toggle opacity by JS) */
 .cat-svg-wrap svg #eyes-open,
 .cat-svg-wrap svg #eyes-closed {
   transition: opacity 120ms linear;
+}
+/* Pawing animation overlay */
+.cat-svg-wrap.pawing::after {
+  content: '🐾';
+  position: absolute;
+  top: 10px;
+  left: 80px;
+  font-size: 24px;
+  animation: pawTap 1.8s ease-in-out;
+}
+
+@keyframes pawTap {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0.2; }
+  20% { transform: translateY(6px) rotate(-10deg); opacity: 1; }
+  40% { transform: translateY(0) rotate(0deg); }
+  60% { transform: translateY(6px) rotate(-10deg); }
+  80% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { opacity: 0; }
+}
+
+
+
+
+.cat-svg-wrap.dancing {
+  animation: danceSway 1800ms ease-in-out infinite;
+}
+.cat-svg-wrap.dancing svg #tail {
+  animation: tailWagFast 800ms ease-in-out infinite;
+}
+.cat-svg-wrap.dancing svg #foot-left {
+  transform-box: fill-box;
+  transform-origin:50% 0%;
+  animation: stepLeft 600ms ease-in-out infinite;
+}
+.cat-svg-wrap.dancing svg #foot-right {
+  transform-box: fill-box;
+  transform-origin:50% 0%;
+  animation: stepRight 600ms ease-in-out infinite;
+}
+
+.cat-svg-wrap .heart {
+  position: absolute;
+  bottom: 20px;
+  font-size: 16px;
+  animation: heartFloat 1.2s ease-in forwards;
+}
+
+@keyframes heartFloat {
+  0% { transform: translateY(0) scale(0.9); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-50px) scale(1.25); opacity: 0; }
+}
+
+/* Cry state */
+.cat-svg-wrap.crying svg #mouth-cry { opacity: 1 !important; }
+.cat-svg-wrap.crying svg #mouth-normal { opacity: 0 !important; }
+.cat-svg-wrap.crying { animation: cryShake 900ms ease-in-out infinite; }
+
+@keyframes cryShake {
+  0% { transform: translateY(0) }
+  50% { transform: translateY(-2px) }
+  100% { transform: translateY(0) }
 }
 
 

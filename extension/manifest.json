@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "PetTalk Productivity",
+  "version": "1.0.0",
+  "description": "Gamified productivity with a virtual pet and Pomodoro.",
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage", "idle", "tabs", "alarms", "notifications", "activeTab"],
+  "host_permissions": ["http://localhost:4000/*", "https://*/*"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["overlay.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

@@ -31,6 +31,13 @@
 .store-close { background:none; border:none; cursor:pointer; font-size:16px; opacity:0.7; }
 .store-close:hover { opacity:1; }
 
+/* Top bar */
+.store-topbar { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+.store-gems-badge { background: linear-gradient(90deg,#3b82f6 0%, #6366f1 100%); color:white; padding:6px 10px; border-radius:9999px; font-weight:700; box-shadow: 0 6px 16px rgba(99,102,241,0.35); }
+.store-gems-count { margin-left:6px; }
+.store-help { font-size:12px; color:#718096; }
+.theme-dark .store-help { color:#cbd5e1; }
+
 /* Body */
 .store-section { display:flex; flex-direction:column; gap:12px; margin-top:12px; }
 .store-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; background:#f7fafc; border-radius:10px; border:1px solid #eef2f7; }
@@ -43,13 +50,23 @@
 /* Store specific cards */
 .store-grid { display:grid; grid-template-columns: 1fr; gap:12px; }
 @media (min-width: 460px) { .store-grid { grid-template-columns: 1fr 1fr; } }
-.store-card { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; background:#fff; border-radius:10px; border:1px solid #eef2f7; box-shadow: 0 8px 20px rgba(23,30,48,0.04); }
+.store-card { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; background:linear-gradient(180deg,#ffffff,#f7f9ff); border-radius:14px; border:1px solid #eef2f7; box-shadow: 0 10px 24px rgba(23,30,48,0.06); transition: transform 0.15s ease, box-shadow 0.2s ease; }
+.store-card:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(23,30,48,0.12); }
 .theme-dark .store-card { background:#0b1220; border-color: rgba(255,255,255,0.06); }
 .store-item-left { display:flex; align-items:center; gap:12px; }
 .store-emoji { font-size: 22px; }
 .store-meta { display:flex; flex-direction:column; line-height:1.1; }
+.store-titleline { display:flex; align-items:center; gap:8px; white-space: nowrap; }
 .store-name { font-weight:700; }
-.store-desc { font-size:12px; color:#718096; }
-.store-price { font-size:12px; color:#718096; }
+.store-price { font-size:12px; color:#718096; font-weight:700; }
 .theme-dark .store-price { color: #94a3b8; }
-.store-buy-btn { background: linear-gradient(90deg,#667eea 0%, #764ba2 100%); color:white; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700; }
+.store-effect { font-size:11px; color:#718096; white-space: nowrap; }
+.theme-dark .store-effect { color:#94a3b8; }
+.store-buy-btn { background: linear-gradient(90deg,#667eea 0%, #764ba2 100%); color:white; border:none; padding:8px 12px; border-radius:9999px; cursor:pointer; font-weight:700; box-shadow: 0 8px 18px rgba(118,75,162,0.35); }
+.store-buy-btn:disabled { background: linear-gradient(90deg,#9aa5ff 0%, #b4a4d8 100%); opacity:0.6; cursor:not-allowed; box-shadow:none; }
+.store-buy-btn:hover:not(:disabled) { filter: brightness(1.03); }
+
+/* Footer */
+.store-footer { margin-top: 10px; }
+.store-tip { font-size: 12px; color:#4a5568; text-align:center; }
+.theme-dark .store-tip { color:#cbd5e1; }

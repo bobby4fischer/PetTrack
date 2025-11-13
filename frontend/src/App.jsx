@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react'
+import { useDispatch } from 'react-redux'
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import Auth from './components/auth/Auth'
 import Dashboard from './components/dashboard/Dashboard'
 import './App.css'
+import { setUserEmail, clearUser } from './store/store.js'
 
 function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   // Check authentication status on app load
   useEffect(() => {
@@ -45,12 +48,18 @@ function AppContent() {
       localStorage.setItem(petKey, JSON.stringify(defaultPet))
     }
 
+    // Wire user email into Redux for per-user persistence
+    dispatch(setUserEmail(email))
+
     navigate('/dashboard')
   }
 
   const handleLogout = () => {
     localStorage.removeItem('user')
+    localStorage.removeItem('authToken')
     setIsAuthenticated(false)
+    // Clear user from Redux
+    dispatch(clearUser())
   }
 
   if (loading) {

@@ -15,6 +15,8 @@ const FocusTimer = ({
   setMusicVolume,
   musicTrack,
   audioRef,
+  activeTaskTitle,
+  startDisabled,
 }) => {
   return (
     <div className="center-timer">
@@ -24,8 +26,13 @@ const FocusTimer = ({
           <div className="timer-display">
             {String(timerMinutes).padStart(2, '0')}:{String(timerSeconds).padStart(2, '0')}
           </div>
+          {activeTaskTitle && (
+            <div className="timer-task">
+              🎯 {activeTaskTitle.length > 24 ? activeTaskTitle.slice(0, 24) + '…' : activeTaskTitle}
+            </div>
+          )}
           <div className="timer-status">
-            {isTimerRunning ? 'Running' : 'Paused'}
+            {isTimerRunning ? 'Running' : (startDisabled ? 'Select a task' : 'Paused')}
           </div>
         </div>
       </div>
@@ -33,8 +40,8 @@ const FocusTimer = ({
         <button 
           className="timer-btn start-btn" 
           onClick={startTimer}
-          disabled={isTimerRunning}
-          title="Start Timer"
+          disabled={isTimerRunning || startDisabled}
+          title={startDisabled ? 'Select a task to start' : 'Start Timer'}
         >
           ▶️
         </button>

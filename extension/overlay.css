@@ -1,0 +1,4 @@
+.pettalk-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 2147483647; display: flex; align-items: center; justify-content: center; }
+.pettalk-overlay .card { background: #111827; color: #fff; padding: 16px 20px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 12px; }
+.pettalk-overlay .pet { font-size: 28px; }
+.pettalk-overlay .btn { background: #34d399; color: #001; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }

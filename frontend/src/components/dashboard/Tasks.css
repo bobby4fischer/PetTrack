@@ -45,7 +45,12 @@
 .task-item.completed { opacity:0.6; background: #ecfffb; }
 .task-content { display:flex; gap:10px; align-items:center; }
 .task-text { font-weight:600; color:#2d3748; }
-.delete-task { background:none; border:none; cursor:pointer; font-size:16px; opacity:0.7; }
+.task-actions { display:flex; gap:8px; }
+.focus-task { display:inline-flex; align-items:center; gap:6px; background: linear-gradient(90deg,#3b82f6 0%, #6366f1 100%); color:white; border:none; border-radius:9999px; padding:6px 10px; font-size:12px; cursor:pointer; }
+.focus-task.active { filter: brightness(1.08); box-shadow: 0 8px 18px rgba(99,102,241,0.3); }
+.focus-task:hover { filter: brightness(1.02); }
+.delete-task { display:inline-flex; align-items:center; gap:6px; background: #ef4444; color:white; border:none; border-radius:9999px; padding:6px 10px; font-size:12px; cursor:pointer; }
+.delete-task:hover { filter: brightness(1.02); }
 .task-item.completed .task-text { text-decoration: line-through; color: #a0aec0; }
 .delete-task:hover { opacity: 1; }
 

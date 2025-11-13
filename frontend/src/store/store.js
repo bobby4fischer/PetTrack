@@ -85,7 +85,10 @@ const tasksSlice = createSlice({
   reducers: {
     addTask: (s, a) => { const text = String(a.payload || '').trim(); if (!text) return; s.push({ id: Date.now(), text, completed: false, createdAt: new Date().toISOString() }); },
     deleteTask: (s, a) => s.filter((t) => t.id !== a.payload),
-    completeTask: (s, a) => s.filter((t) => t.id !== a.payload),
+    completeTask: (s, a) => {
+      const id = a.payload
+      return s.map((t) => t.id === id ? { ...t, completed: !t.completed, completedAt: !t.completed ? new Date().toISOString() : null } : t)
+    },
     setTasks: (s, a) => a.payload,
   }
 });

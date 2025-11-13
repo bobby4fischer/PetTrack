@@ -1,9 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./Cat.css";
 
-export default function Cat() {
+export default function Cat({ reactKey, moodPercent }) {
   const containerRef = useRef(null);
   const [blink, setBlink] = useState(false);
+  const [pawing, setPawing] = useState(false);
+  const [dancing, setDancing] = useState(false);
+  const [crying, setCrying] = useState(false);
+  const [hearts, setHearts] = useState([]);
 
   // --- mount: push tail behind body (remove eyelids entirely) ---
   useEffect(() => {
@@ -23,6 +27,36 @@ export default function Cat() {
       // ignore if something fails
     }
   }, []);
+
+  useEffect(() => {
+    setPawing(true)
+    const t = setTimeout(() => setPawing(false), 2000)
+    return () => clearTimeout(t)
+  }, [])
+
+  useEffect(() => {
+    if (typeof reactKey === 'number') {
+      setPawing(true)
+      setDancing(true)
+      const t1 = setTimeout(() => setPawing(false), 2000)
+      const t2 = setTimeout(() => setDancing(false), 3500)
+      return () => { clearTimeout(t1); clearTimeout(t2); }
+    }
+  }, [reactKey])
+
+  useEffect(() => {
+    let i = setInterval(() => {
+      const m = Number(moodPercent || 0)
+      if (m >= 50) {
+        setDancing(true)
+        setTimeout(() => setDancing(false), 2800)
+      } else {
+        setCrying(true)
+        setTimeout(() => setCrying(false), 2800)
+      }
+    }, 10000)
+    return () => clearInterval(i)
+  }, [moodPercent])
 
   // Removed pointer-follow behavior (pupils/eyelids/head). Eyes remain static.
 
@@ -77,11 +111,22 @@ export default function Cat() {
 </g><g id="fireworks-eyes-right" style="opacity: 0;"><ellipse id="ring_5" cx="83.7568" cy="50.3136" rx="14.7568" ry="15.3136" fill="#FFB82F"></ellipse><ellipse id="ring_6" cx="83.8631" cy="50.2333" rx="9.81132" ry="10.1816" fill="#3E00F0"></ellipse><ellipse id="ring_7" cx="84.108" cy="50.3579" rx="6.62264" ry="6.87255" fill="#FF4CB8"></ellipse><ellipse id="ring_8" cx="84.3532" cy="50.5013" rx="3.92453" ry="4.07262" fill="#FEA3EA"></ellipse><path id="star_2" d="M84.3533 42.0137L85.4737 49.2329L92.6929 50.3533L85.4737 51.4737L84.3533 58.6929L83.2329 51.4737L76.0137 50.3533L83.2329 49.2329L84.3533 42.0137Z" fill="white"></path></g></g></g></g></g><g id="eyes-closed" style="opacity: 0;"><path id="Vector 150" d="M44 55.5C44 55.5 48.5 65 55.5 65C62.5 65 65.5 55.5 65.5 55.5" stroke="black" stroke-opacity="0.5" stroke-linecap="round"></path><path id="Vector 151" d="M73 55C73 55 76.5 66 83.5 65C90.9411 63.937 94.5 55.5 94.5 55.5" stroke="black" stroke-opacity="0.5" stroke-linecap="round"></path></g><g id="mouth"><path id="mouth-normal" d="M69.5052 66.832L69.6199 78.4206M69.6199 78.4206C69.6199 78.4206 63.8776 81.1476 60.3262 80.1416C56.7852 79.1386 53.3271 73.831 53.3271 73.831M69.6199 78.4206V66.832M69.6199 78.4206C69.6199 78.4206 74.6725 80.8934 77.8811 80.1416C81.4968 79.2944 84.9948 73.831 84.9948 73.831" stroke="black" stroke-width="1.14738" stroke-linecap="round" style="opacity: 1;"></path><path id="mouth-cry" d="M69.5247 66L69.6395 77.5885M69.6395 77.5885C69.6395 77.5885 64.5 82.5752 60.3457 79.3096C57.4523 77.0352 56 83.0752 56 83.0752M69.6395 77.5885V66M69.6395 77.5885C69.6395 77.5885 74 83.0752 77.9006 79.3096C80.5724 76.7303 83 83.0752 83 83.0752" stroke="black" stroke-width="1.14738" stroke-linecap="round" style="opacity: 0;"></path></g><path id="Polygon 1" d="M65.9582 70.8476C67.6364 73.7543 71.8318 73.7543 73.51 70.8476L75.1992 67.9218C76.8774 65.0151 74.7797 61.3818 71.4233 61.3818H68.0449C64.6885 61.3818 62.5908 65.0151 64.269 67.9218L65.9582 70.8476Z" fill="#5A4B4F"></path><g id="Group 9"><path id="Vector 5" d="M76.0449 72.3389L90.8461 79.1084" stroke="black" stroke-width="0.458952" stroke-linecap="round"></path><path id="Vector 6" d="M76.2744 70.7327L91.3051 75.3223" stroke="black" stroke-width="0.458952" stroke-linecap="round"></path><path id="Vector 7" d="M77.0771 69.5856L91.3046 71.5361" stroke="black" stroke-width="0.458952" stroke-linecap="round"></path></g><g id="Group 10"><path id="Vector 5_2" d="M64.6855 72.3389L49.8844 79.1084" stroke="black" stroke-width="0.458952" stroke-linecap="round"></path><path id="Vector 6_2" d="M64.4561 70.7327L49.4254 75.3223" stroke="black" stroke-width="0.458952" stroke-linecap="round"></path><path id="Vector 7_2" d="M63.6533 69.5846L49.4258 71.5352" stroke="black" stroke-width="0.458952" stroke-linecap="round"></path></g></g></g></svg>
 `;
 
+  const showerHearts = () => {
+    const arr = Array.from({ length: 10 }).map((_, i) => ({ id: Date.now() + i, left: 30 + Math.random() * 150, delay: Math.random() * 0.2 }))
+    setHearts(arr)
+    setTimeout(() => setHearts([]), 1500)
+  }
+
   return (
     <div
-      className="cat-svg-wrap"
+      className={`cat-svg-wrap ${pawing ? 'pawing' : ''} ${dancing ? 'dancing' : ''} ${crying ? 'crying' : ''}`}
       ref={containerRef}
-      dangerouslySetInnerHTML={{ __html: svgMarkup }}
-    />
+      onClick={showerHearts}
+    >
+      <div className="cat-svg" dangerouslySetInnerHTML={{ __html: svgMarkup }} />
+      {hearts.map((h) => (
+        <span key={h.id} className="heart" style={{ left: h.left, animationDelay: `${h.delay}s` }}>❤️</span>
+      ))}
+    </div>
   );
 }
